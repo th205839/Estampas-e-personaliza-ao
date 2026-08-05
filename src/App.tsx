@@ -1,4 +1,10 @@
+import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
+
+import { platformConfig } from './config/platform'
+import { createWorkspaceRepository } from './infrastructure/workspace-repository'
+
+const workspaceRepository = createWorkspaceRepository()
 
 const navigation = [
   { to: '/', label: 'Visão geral' },
@@ -13,15 +19,34 @@ const metrics = [
 ]
 
 function Dashboard() {
+  const [workspaceName, setWorkspaceName] = useState('Carregando workspace…')
+  const [connectionState, setConnectionState] = useState('Verificando dados')
+
+  useEffect(() => {
+    workspaceRepository
+      .getActiveWorkspace()
+      .then((workspace) => {
+        setWorkspaceName(workspace.name)
+        setConnectionState(
+          platformConfig.apiBaseUrl ? 'API corporativa conectada' : 'Modo local',
+        )
+      })
+      .catch(() => {
+        setWorkspaceName('Workspace indisponível')
+        setConnectionState('Verifique a conexão da API')
+      })
+  }, [])
+
   return (
     <section className="page-content">
       <div className="page-heading">
         <div>
-          <p className="kicker">Operação de estampas</p>
+          <p className="kicker">{connectionState}</p>
           <h1>Controle de arte, molde e produção em um só lugar.</h1>
           <p className="page-lead">
-            Uma base preparada para operar localmente hoje e se conectar à sua
-            plataforma corporativa quando necessário.
+            Workspace atual: <strong>{workspaceName}</strong>. Uma base preparada
+            para operar localmente hoje e se conectar à sua plataforma
+            corporativa quando necessário.
           </p>
         </div>
         <NavLink className="button button--primary" to="/bancada">
@@ -108,8 +133,8 @@ function Operations() {
         <span aria-hidden="true">◌</span>
         <h2>Conecte a sua fonte de dados</h2>
         <p>
-          Defina a API corporativa em <code>VITE_API_BASE_URL</code> para
-          iniciar a integração com autenticação e dados centralizados.
+          Defina <code>VITE_API_BASE_URL</code> para usar a API incluída nesta
+          base ou o endpoint corporativo da sua organização.
         </p>
       </div>
     </section>
@@ -117,6 +142,10 @@ function Operations() {
 }
 
 export default function App() {
+  const environmentLabel = platformConfig.apiBaseUrl
+    ? 'API corporativa'
+    : 'Ambiente local'
+
   return (
     <div className="application-shell">
       <header className="app-header">
@@ -144,7 +173,7 @@ export default function App() {
 
         <div className="app-status">
           <i aria-hidden="true" />
-          Ambiente local
+          {environmentLabel}
         </div>
       </header>
 
