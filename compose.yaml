@@ -1,0 +1,14 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      API_ALLOWED_ORIGIN: ${API_ALLOWED_ORIGIN:-http://localhost:5173}
+      API_ACCESS_TOKEN: ${API_ACCESS_TOKEN:-}
+      DATA_DIRECTORY: /app/data
+    volumes:
+      - estampas-data:/app/data
+
+volumes:
+  estampas-data:
