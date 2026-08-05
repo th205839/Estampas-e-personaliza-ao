@@ -204,6 +204,7 @@ window.storage = window.storage || {
           <button class="btn btn-secondary" id="fitContain" title="Mantém a proporção original da imagem, com margem branca se sobrar espaço">Caber (proporção)</button>
           <button class="btn btn-secondary" id="trocarImg">Trocar imagem</button>
           <button class="btn btn-secondary" id="resetBtn">Nova arte</button>
+          <button class="btn btn-secondary" id="exportSvgBtn" title="Exporta o contorno do molde em escala real (cm), pra abrir no Illustrator, CorelDRAW, Inkscape ou plotter de recorte">Contorno (SVG)</button>
           <button class="btn btn-primary" id="exportBtn">Renderizar e baixar PNG</button>
         </div>
         <div class="status" id="status"></div>
@@ -293,10 +294,7 @@ const posicaoWrap=document.getElementById('posicaoWrap'), posicaoSel=document.ge
 const dimReadout=document.getElementById('dimReadout'), dpiSel=document.getElementById('dpi');
 const freeRes=document.getElementById('freeRes'), freeResBlock=document.getElementById('freeResBlock');
 const resPreset=document.getElementById('resPreset'), customResRow=document.getElementById('customResRow');
-const cwInput=document.getElementById('cw'), chInput=document.getElementById('ch');
-const canvas=document.getElementById('preview'), ctx=canvas.getContext('2d');
-const statusEl=document.getElementById('status'), mockupRow=document.getElementById('mockupRow');
-const aiToggle=d…5265 tokens truncated…F" stroke-width="2"/>
+const cwInput=document.getElementById('cw'), chInput=document.get…5668 tokens truncated…F" stroke-width="2"/>
         <image href="${dataUrl}" x="0" y="0" width="200" height="240" clip-path="url(#${clipId})"/>
         <path d="${shape.outline}" fill="none" stroke="#00AEEF" stroke-width="2"/>
         ${shape.collar ? `<path d="${shape.collar}" fill="none" stroke="#00AEEF" stroke-width="1.5"/>` : ''}
