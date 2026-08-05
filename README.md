@@ -1,6 +1,8 @@
-# Estampas e Personalização
+# Bancada de Estampas
 
-Aplicação React criada com Vite e TypeScript.
+Aplicação Vite, React e TypeScript que apresenta a **Bancada de Estampas** original.
+
+A ferramenta permite preparar artes para sublimação: escolher produtos e moldes, enviar e ajustar imagens, calcular a resolução de saída, gerar PNG para prensa, visualizar mockups vetoriais e explorar um protótipo 3D.
 
 ## Desenvolvimento
 
@@ -16,7 +18,7 @@ pnpm dev
 - `pnpm format:check` — verifica a formatação com Prettier.
 - `pnpm format` — formata os arquivos.
 
-## Rotas
+## Estrutura
 
-- `/` — página inicial.
-- `/catalogo` — catálogo.
+- `src/App.tsx` — ponto de entrada React que exibe a bancada.
+- `public/bancada-de-estampas.html` — implementação original completa da ferramenta, incluindo o motor de mockups 3D.
