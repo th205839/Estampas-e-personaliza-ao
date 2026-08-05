@@ -1,0 +1,737 @@
+Exit code: 0
+Wall time: 1.1 seconds
+Total output lines: 1177
+Output:
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Bancada de Estampas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --ink:#14161A; --ink-2:#1E2128; --paper:#F2EDE4; --paper-dim:#E7E0D2;
+    --cyan:#00AEEF; --magenta:#EC008C; --yellow:#FFD400; --key:#EDEDED; --line: rgba(242,237,228,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--ink); color:var(--paper); font-family:'Inter',sans-serif; min-height:100vh; }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
+  header{ display:flex;justify-content:space-between;align-items:flex-end; border-bottom:2px solid var(--paper); padding-bottom:16px;margin-bottom:26px;flex-wrap:wrap;gap:10px; }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand .marca{ width:38px;height:38px;border-radius:50%; background:conic-gradient(var(--cyan) 0 25%, var(--magenta) 25% 50%, var(--yellow) 50% 75%, var(--key) 75% 100%); flex-shrink:0; }
+  h1{font-family:'Archivo Black',sans-serif;font-size:26px;margin:0;letter-spacing:0.5px;text-transform:uppercase;}
+  .sub{font-family:'Space Mono',monospace;font-size:11px;color:var(--paper-dim);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+  .reg{font-family:'Space Mono',monospace;font-size:11px;color:var(--paper-dim);text-align:right;line-height:1.6;}
+  .grid{display:grid;grid-template-columns:320px 1fr;gap:22px;}
+  @media (max-width:840px){.grid{grid-template-columns:1fr;}}
+  .howto{background:var(--ink-2);border:1px solid var(--cyan);border-radius:2px;padding:16px 18px;margin-bottom:16px;}
+  .howto ol{font-size:12.5px;color:var(--paper-dim);line-height:1.8;padding-left:18px;margin:0;}
+  .howto b{color:var(--paper);}
+  .howto summary{cursor:pointer;color:var(--cyan);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+  #processingOverlay{display:none;position:fixed;inset:0;background:rgba(20,22,26,0.8);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+  .spinner{width:38px;height:38px;border:3px solid rgba(242,237,228,0.2);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #dropZone:focus-visible, .btn:focus-visible, select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+  @media (max-width:520px){
+    #three3d{width:220px;height:220px;}
+    svg.mock{width:120px;height:148px;}
+    h1{font-size:20px;}
+  }
+  .panel{ background:var(--ink-2);border:1px solid var(--line);border-radius:2px;padding:18px; }
+  .panel + .panel{margin-top:16px;}
+  .eyebrow{ font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase; color:var(--cyan);margin-bottom:10px;display:flex;align-items:center;gap:8px; }
+  .eyebrow::before{content:'';width:8px;height:8px;background:var(--cyan);}
+  label{display:block;font-size:12px;color:var(--paper-dim);margin:12px 0 5px;text-transform:uppercase;letter-spacing:0.5px;}
+  select, input[type=number], input[type=text]{ width:100%;padding:9px 10px;background:var(--ink);border:1px solid var(--line); color:var(--paper);font-family:'Inter',sans-serif;font-size:14px;border-radius:2px; }
+  select:focus, input:focus{outline:2px solid var(--cyan);outline-offset:1px;}
+  .btn{ width:100%;padding:11px 12px;margin-top:12px;border:none;border-radius:2px; font-family:'Space Mono',monospace;font-size:12px;letter-spacing:1px;text-transform:uppercase; cursor:pointer;transition:transform .1s ease; }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--magenta);color:#fff;}
+  .btn-secondary{background:transparent;color:var(--paper);border:1px solid var(--paper-dim);}
+  .btn-secondary.active{background:var(--paper);color:var(--ink);}
+  .btn-outline{background:transparent;color:var(--cyan);border:1px solid var(--cyan);}
+  .btn-ai{background:transparent;color:var(--yellow);border:1px solid var(--yellow);}
+  .btn-ai.on{background:var(--yellow);color:var(--ink);}
+  .btn[disabled]{opacity:0.35;cursor:not-allowed;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .dim-readout{ font-family:'Space Mono',monospace;font-size:12px;background:var(--ink);border:1px dashed var(--line); padding:10px;margin-top:10px;line-height:1.7;color:var(--yellow); }
+  .dim-readout span{color:var(--paper-dim);}
+  .stage{ background:var(--ink-2);border:1px solid var(--line);border-radius:2px; padding:18px;display:flex;flex-direction:column;align-items:center;gap:14px;min-height:520px;justify-content:center; position:relative; }
+  .stage-empty{font-family:'Space Mono',monospace;color:var(--paper-dim);font-size:13px;text-align:center;max-width:280px;line-height:1.6;}
+  .stage-empty b{color:var(--paper);}
+  #dropZone{ border:2px dashed var(--line);padding:26px;border-radius:2px;cursor:pointer;text-align:center; }
+  #dropZone.drag{border-color:var(--cyan);color:var(--cyan);}
+  .canvas-frame{position:relative;}
+  .corner{position:absolute;width:16px;height:16px;pointer-events:none;}
+  .corner::before, .corner::after{content:'';position:absolute;background:var(--cyan);}
+  .corner::before{width:100%;height:1px;top:50%;}
+  .corner::after{width:1px;height:100%;left:50%;}
+  .tl{top:-8px;left:-8px;} .tr{top:-8px;right:-8px;} .bl{bottom:-8px;left:-8px;} .br{bottom:-8px;right:-8px;}
+  canvas#preview{max-width:100%;background:#fff;display:block;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .toolbar .btn{width:auto;margin-top:0;padding:9px 16px;}
+  .status{font-family:'Space Mono',monospace;font-size:11px;color:var(--paper-dim);text-align:center;min-height:16px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+  th,td{border:1px solid var(--line);padding:5px 6px;text-align:left;}
+  th{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;}
+  td input{padding:4px 5px;font-size:12px;}
+  .tbl-actions{display:flex;gap:8px;margin-top:10px;}
+  .tbl-actions .btn{margin-top:0;}
+  details summary{cursor:pointer;color:var(--cyan);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-top:6px;}
+  .note{font-size:11px;color:var(--paper-dim);margin-top:8px;line-height:1.5;}
+  .mockup-cols{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;align-items:flex-start;width:100%;}
+  .mockup-col{flex:1;min-width:260px;}
+  .mockup-col-title{font-family:'Space Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-bottom:10px;}
+  .mockup-row{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .mockup-box{text-align:center;}
+  .mockup-box .lbl{font-family:'Space Mono',monospace;font-size:10px;color:var(--paper-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+  svg.mock{width:150px;height:185px;background:var(--ink);border:1px solid var(--line);border-radius:2px;}
+  #three3d{width:280px;height:280px;margin:0 auto;background:radial-gradient(circle at 50% 35%, #262A33, var(--ink) 75%);border:1px solid var(--line);border-radius:2px;touch-action:none;}
+  #three3d canvas{display:block;border-radius:2px;}
+  .drag-hint{font-family:'Space Mono',monospace;font-size:10px;color:var(--paper-dim);text-align:center;margin-top:8px;letter-spacing:0.5px;}
+</style>
+</head>
+<body>
+<script>
+window.storage = window.storage || {
+  async get(key) { return { value: window.localStorage.getItem(key) } },
+  async set(key, value) { window.localStorage.setItem(key, value) },
+  async delete(key) { window.localStorage.removeItem(key) },
+}
+</script>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="marca"></div>
+      <div><h1>Bancada de Estampas</h1><div class="sub">Preparo de arte · sublimação</div></div>
+    </div>
+    <div class="reg">CMYK · REGISTRO 01<br>escala 1:1 no molde</div>
+  </header>
+
+  <details class="howto" open>
+    <summary>Como usar</summary>
+    <ol>
+      <li>Escolha o <b>produto</b> e o <b>tamanho</b> — ou clique em "+ produto"/"+ tamanho" pra cadastrar o seu (e "excluir" pra remover um que não usa).</li>
+      <li>Envie a imagem: arraste pra área da direita ou clique nela.</li>
+      <li>Confira o encaixe na prévia e o formato real em <b>"Como vai ficar no produto"</b> (vetor e 3D — arraste pra girar).</li>
+      <li>Ajuste DPI/resolução se precisar, e baixe o PNG pronto pra prensa.</li>
+    </ol>
+    <div class="note">Seu progresso (produto, tamanho, imagem e ajustes) fica salvo neste navegador — se fechar e voltar, continua de onde parou. Use "Nova arte" pra começar do zero. Na tabela de moldes, use "Exportar (JSON)" de vez em quando pra ter um backup das suas medidas — e "Importar (JSON)" pra restaurar em outro computador/navegador.</div>
+  </details>
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <div class="eyebrow">01 · Produto e molde</div>
+        <label for="produto">Produto</label>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <select id="produto" style="flex:1;"></select>
+          <button class="btn btn-outline" id="addProduto" style="width:auto;margin-top:0;padding:9px 12px;" title="Adicionar um novo produto">+ produto</button>
+          <button class="btn btn-secondary" id="delProduto" style="width:auto;margin-top:0;padding:9px 12px;" title="Excluir o produto selecionado">excluir</button>
+        </div>
+        <label for="tamanho">Tamanho</label>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <select id="tamanho" style="flex:1;"></select>
+          <button class="btn btn-outline" id="addTamanho" style="width:auto;margin-top:0;padding:9px 12px;" title="Adicionar/parametrizar um novo tamanho">+ tamanho</button>
+        </div>
+        <div id="posicaoWrap" style="display:none;">
+          <label for="posicao">Posição da estampa</label>
+          <select id="posicao">
+            <option value="cheia">Completa (frente)</option>
+            <option value="centralizada">Centralizada (peito)</option>
+            <option value="versoCompleto">Completa (verso)</option>
+          </select>
+        </div>
+        <div class="dim-readout" id="dimReadout">—</div>
+        <details id="tabelaDetails">
+          <summary>Editar tabela de moldes</summary>
+          <div id="tableEditor"></div>
+          <div class="tbl-actions">
+            <button class="btn btn-outline" id="addSize">+ tamanho</button>
+            <button class="btn btn-secondary" id="saveTable">Salvar tabela</button>
+          </div>
+          <div class="tbl-actions">
+            <button class="btn btn-secondary" id="exportTable">Exportar (JSON)</button>
+            <button class="btn btn-secondary" id="importTableBtn">Importar (JSON)</button>
+            <input type="file" id="importTableFile" accept="application/json" style="display:none;">
+          </div>
+          <div class="note">Valores de referência de mercado — ajuste para bater com os seus moldes. Fica salvo neste navegador. Exporte um backup em JSON de vez em quando — se limpar o navegador, você não perde as medidas.</div>
+        </details>
+      </div>
+
+      <div class="panel">
+        <div class="eyebrow">02 · Resolução de saída</div>
+        <label for="dpi">Qualidade (DPI, baseado no molde)</label>
+        <select id="dpi">
+          <option value="150">150 DPI — rascunho</option>
+          <option value="300" selected>300 DPI — padrão sublimação</option>
+          <option value="600">600 DPI — alta definição</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:14px;">
+          <input type="checkbox" id="freeRes" style="width:auto;">
+          <span style="text-transform:none;letter-spacing:0;font-size:13px;color:var(--paper);">usar resolução livre (ignora molde)</span>
+        </label>
+        <div id="freeResBlock" style="display:none;">
+          <label for="resPreset">Resolução alvo</label>
+          <select id="resPreset">
+            <option value="3840x2160">4K — 3840 × 2160</option>
+            <option value="7680x4320">8K — 7680 × 4320</option>
+            <option value="custom">Personalizada</option>
+          </select>
+          <div class="row2" id="customResRow" style="display:none;">
+            <div><label for="cw">Largura (px)</label><input type="number" id="cw" value="4000"></div>
+            <div><label for="ch">Altura (px)</label><input type="number" id="ch" value="4000"></div>
+          </div>
+        </div>
+        <button class="btn btn-ai" id="aiToggle" title="Aplica nitidez e realce de detalhe no upscale, processado localmente no navegador — não é um modelo generativo de nuvem.">Upscale com IA: desligado</button>
+        <div class="note">Realça bordas e detalhe durante a ampliação (processamento local, sem enviar sua imagem pra fora). Para upscale generativo real (tipo Real-ESRGAN), me avise que integro uma API externa com sua chave.</div>
+      </div>
+    </div>
+
+    <div class="panel stage">
+      <div id="dropZone" tabindex="0" role="button" aria-label="Enviar imagem: arraste ou pressione Enter para escolher o arquivo">
+        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+        <div class="stage-empty"><b>Arraste uma imagem aqui</b><br>ou clique (ou pressione Enter) para escolher o arquivo.<br>PNG, JPG ou WEBP.</div>
+      </div>
+      <div id="canvasWrap" style="display:none;width:100%;">
+        <div style="display:flex;justify-content:center;">
+          <div class="canvas-frame">
+            <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+            <canvas id="preview"></canvas>
+          </div>
+        </div>
+        <div class="toolbar" style="margin-top:14px;">
+          <button class="btn btn-secondary" id="mirrorBtn">Espelhar</button>
+          <button class="btn btn-secondary active" id="fitCover" title="Estica a imagem pra ocupar o molde inteiro, sem cortar nada">Preencher (esticar)</button>
+          <button class="btn btn-secondary" id="fitContain" title="Mantém a proporção original da imagem, com margem branca se sobrar espaço">Caber (proporção)</button>
+          <button class="btn btn-secondary" id="trocarImg">Trocar imagem</button>
+          <button class="btn btn-secondary" id="resetBtn">Nova arte</button>
+          <button class="btn btn-primary" id="exportBtn">Renderizar e baixar PNG</button>
+        </div>
+        <div class="status" id="status"></div>
+
+        <div class="eyebrow" style="margin-top:24px;">03 · Como vai ficar no produto</div>
+        <div class="mockup-cols">
+          <div class="mockup-col">
+            <div class="mockup-col-title">Vetorizado</div>
+            <div class="mockup-row" id="mockupRow"></div>
+          </div>
+          <div class="mockup-col">
+            <div class="mockup-col-title">3D (protótipo)</div>
+            <div id="three3d"></div>
+            <div class="drag-hint">arraste para girar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="processingOverlay">
+  <div class="spinner"></div>
+  <div id="processingText" style="font-family:'Space Mono',monospace;color:var(--paper);font-size:13px;letter-spacing:0.5px;"></div>
+</div>
+
+<script>
+function chinelosPadrao(){
+  const out = {};
+  for(let n=17;n<=46;n++){
+    const altura = parseFloat((10 + (n-15)*(2/3)).toFixed(1));
+    const larguraSuperior = parseFloat((altura*0.40).toFixed(1));
+    const larguraCentral = parseFloat((altura*0.27).toFixed(1));
+    const calcanhar = parseFloat((altura*0.32).toFixed(1));
+    out[String(n)] = {altura, larguraSuperior, larguraCentral, calcanhar};
+  }
+  return out;
+}
+const DEFAULT_MOLDES = {
+  "Camisa": { unidade:"cm", tamanhos:{
+      "Frente cheia PP":{w:24,h:32}, "Frente cheia P":{w:26,h:34}, "Frente cheia M":{w:28,h:36}, "Frente cheia G":{w:30,h:38}, "Frente cheia GG":{w:32,h:40}, "Frente cheia XG":{w:34,h:42},
+      "Frente completa adulto (padrão)":{w:30.5,h:40.6}, "Frente oversized adulto":{w:35.6,h:43.2},
+      "Costas completa adulto (padrão)":{w:30.5,h:40.6},
+      "Frente completa juvenil":{w:22.9,h:30.5}, "Frente completa infantil":{w:17.8,h:20.3},
+      "Peito centralizado (padrão 4x4pol)":{w:10.2,h:10.2}, "Peito esquerdo/direito":{w:10.2,h:10.2}, "Bolso":{w:10.2,h:10.2},
+      "Across chest":{w:25.4,h:6.4}, "Nuca/yoke":{w:20.3,h:7.6}, "Manga":{w:8.9,h:8.9}, "Etiqueta lateral":{w:8.9,h:8.9},
+      "Peito bebê 0-6m (3cm abaixo colarinho)":{w:8,h:8}, "Peito bebê 9-18m (3cm abaixo colarinho)":{w:10.5,h:10.5},
+      "Peito criança 2-3a (4cm abaixo colarinho)":{w:12,h:12}, "Peito criança 4-5a (4cm abaixo colarinho)":{w:14.5,h:14.5},
+      "Peito jovem 6-8a (5cm abaixo colarinho)":{w:16,h:16}, "Peito jovem 9-11a (5cm abaixo colarinho)":{w:18,h:18}, "Peito jovem 12-14a (5cm abaixo colarinho)":{w:19,h:19},
+      "Peito mulher XS-M (6cm abaixo colarinho)":{w:22,h:22}, "Peito mulher L-XL (6cm abaixo colarinho)":{w:25,h:25},
+      "Peito homem XS-S (7cm abaixo colarinho)":{w:22,h:22}, "Peito homem M-L (7cm abaixo colarinho)":{w:25,h:25}, "Peito homem XL (7cm abaixo colarinho)":{w:29,h:29}
+  } },
+  "Caneca": { unidade:"cm", tamanhos:{ "325ml (padrão)":{w:21,h:9.5}, "400ml (mágica)":{w:20,h:9.5}, "500ml":{w:24,h:10} } },
+  "Chinelo (nº BR)": { unidade:"cm", tamanhos: chinelosPadrao() },
+  "Boné": { unidade:"cm", tamanhos:{ "Aba frontal":{w:14,h:6}, "Lateral":{w:10,h:6} } },
+  "Caneta": { unidade:"cm", tamanhos:{ "Gravação/adesivo padrão (3,4x1cm)":{w:3.4,h:1}, "Adesivo faixa corpo todo":{w:3,h:13} } },
+  "Copo": { unidade:"cm", tamanhos:{
+      "Long drink 300ml (diâm. 7,3cm)":{w:23,h:8}, "Polímero 320ml (diâm. 8cm)":{w:25.1,h:8},
+      "Polímero 400ml c/ tampa (diâm. 8cm)":{w:25.1,h:11.5}, "Polímero 450/500ml c/ tampa (diâm. 8cm)":{w:25.1,h:12},
+      "Twister 500ml":{w:26,h:13}, "Tumbler inox 600ml":{w:24,h:11}
+  } },
+  "Bag": { unidade:"cm", tamanhos:{
+      "Ecobag P 25x30":{w:25,h:30}, "Ecobag P 30x30":{w:30,h:30}, "Ecobag M 30x40":{w:30,h:40},
+      "Ecobag G 40x40":{w:40,h:40}, "Ecobag G 40x45":{w:40,h:45}, "Ecobag GG 43x43":{w:43,h:43}
+  } },
+  "Prato": { unidade:"cm", tamanhos:{
+      "Sobremesa 15cm (área ~9cm)":{w:9,h:9}, "Raso 20cm (área 11cm)":{w:11,h:11},
+      "Raso 25cm (área ~14cm)":{w:14,h:14}, "Fundo 26,5cm (área 16,5cm)":{w:16.5,h:16.5},
+      "Grande 30cm (área ~18cm)":{w:18,h:18}
+  } },
+  "Números e Letras": { unidade:"cm", tamanhos:{
+      "Número costas - padrão FIFA (25cm)":{w:15,h:25}, "Número costas - grande (30cm)":{w:18,h:30},
+      "Número frente/calção (12cm)":{w:7,h:12}, "Nome do jogador (6cm)":{w:24,h:6},
+      "Letra avulsa termocolante (5cm)":{w:3.5,h:5}
+  } },
+  "Etiqueta": { unidade:"cm", tamanhos:{
+      "Sublimação bandeirinha (2,2x6cm)":{w:2.2,h:6}, "Cetim 3x3cm":{w:3,h:3},
+      "Cetim 5x3cm":{w:5,h:3}, "Cetim 7,5x3cm":{w:7.5,h:3}
+  } }
+};
+const STORAGE_KEY = "moldes-config-v1";
+let MOLDES = JSON.parse(JSON.stringify(DEFAULT_MOLDES));
+let img = null, mirrored = false, fitMode = "cover", aiOn = false;
+
+const produtoSel=document.getElementById('produto'), tamanhoSel=document.getElementById('tamanho');
+const posicaoWrap=document.getElementById('posicaoWrap'), posicaoSel=document.getElementById('posicao');
+const dimReadout=document.getElementById('dimReadout'), dpiSel=document.getElementById('dpi');
+const freeRes=document.getElementById('freeRes'), freeResBlock=document.getElementById('freeResBlock');
+const resPreset=document.getElementById('resPreset'), customResRow=document.getElementById('customResRow');
+const cwInput=document.getElementById('cw'), chInput=document.getElementById('ch');
+const canvas=document.getElementById('preview'), ctx=canvas.getContext('2d');
+const statusEl=document.getElementById('status'), mockupRow=document.getElementById('mockupRow');
+const aiToggle=d…5265 tokens truncated…F" stroke-width="2"/>
+        <image href="${dataUrl}" x="0" y="0" width="200" height="240" clip-path="url(#${clipId})"/>
+        <path d="${shape.outline}" fill="none" stroke="#00AEEF" stroke-width="2"/>
+        ${shape.collar ? `<path d="${shape.collar}" fill="none" stroke="#00AEEF" stroke-width="1.5"/>` : ''}
+        ${shape.handle ? `<path d="${shape.handle}" fill="none" stroke="#00AEEF" stroke-width="2"/>` : ''}
+        ${shape.rim ? `<path d="${shape.rim}" fill="none" stroke="#00AEEF" stroke-width="1.2"/>` : ''}
+        ${shape.innerRim ? `<path d="${shape.innerRim}" fill="none" stroke="#00AEEF" stroke-width="1.2" stroke-dasharray="4,3"/>` : ''}
+      </svg>`;
+    mockupRow.appendChild(box);
+  });
+  updateThreeMockup();
+}
+function renderChineloPair(){
+  const layout = chineloLayout(200,240,10);
+  const zone = {x:layout.x, y:layout.y, w:layout.w, h:layout.h};
+  const artC = document.createElement('canvas');
+  artC.width=200; artC.height=240;
+  renderIntoZone(artC.getContext('2d'), zone);
+  const dataUrl = artC.toDataURL('image/png');
+  const transform = `translate(${layout.cx},${layout.y}) scale(${layout.s})`;
+  const cy = layout.y + layout.h/2;
+  const inset = `translate(${layout.cx},${cy}) scale(0.92) translate(${-layout.cx},${-cy})`;
+  const box = document.createElement('div');
+  box.className='mockup-box';
+  box.innerHTML = `
+    <div class="lbl">Chinelo · par espelhado (A = arte · B = sangria)</div>
+    <svg class="mock" style="width:280px;height:200px;" viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="clipChL"><path d="${layout.d}" transform="${transform}"/></clipPath>
+        <clipPath id="clipChR"><path d="${layout.d}" transform="${transform}"/></clipPath>
+      </defs>
+      <g>
+        <path d="${layout.d}" transform="${transform}" fill="#F2EDE4" stroke="#F2A9C0" stroke-width="2"/>
+        <image href="${dataUrl}" x="0" y="0" width="200" height="240" clip-path="url(#clipChL)"/>
+        <path d="${layout.d}" transform="${transform}" fill="none" stroke="#F2A9C0" stroke-width="2"/>
+        <g transform="${inset}">
+          <path d="${layout.d}" transform="${transform}" fill="none" stroke="#E8342C" stroke-width="1.6" stroke-dasharray="5,4"/>
+        </g>
+        <rect x="4" y="4" width="15" height="15" fill="#00AEEF"/><text x="11.5" y="15" font-size="11" fill="#fff" text-anchor="middle" font-family="'Space Mono',monospace">A</text>
+        <rect x="22" y="16" width="15" height="15" fill="#E8342C"/><text x="29.5" y="27" font-size="11" fill="#fff" text-anchor="middle" font-family="'Space Mono',monospace">B</text>
+      </g>
+      <g transform="translate(340,0) scale(-1,1)">
+        <path d="${layout.d}" transform="${transform}" fill="#F2EDE4" stroke="#F2A9C0" stroke-width="2"/>
+        <image href="${dataUrl}" x="0" y="0" width="200" height="240" clip-path="url(#clipChR)"/>
+        <path d="${layout.d}" transform="${transform}" fill="none" stroke="#F2A9C0" stroke-width="2"/>
+        <g transform="${inset}">
+          <path d="${layout.d}" transform="${transform}" fill="none" stroke="#E8342C" stroke-width="1.6" stroke-dasharray="5,4"/>
+        </g>
+      </g>
+    </svg>`;
+  mockupRow.appendChild(box);
+}
+function renderIntoZone(context, zone){
+  context.clearRect(0,0,200,240);
+  const printCanvas = buildPrintCanvas(280);
+  context.drawImage(printCanvas, 0,0,printCanvas.width,printCanvas.height, zone.x, zone.y, zone.w, zone.h);
+}
+
+/* ---------- 3D (protótipo, Three.js) ---------- */
+let threeScene, threeCamera, threeRenderer, threeGroup, threeInited=false;
+let rotY=0.5, rotX=-0.12, isDragging=false, lastX=0, lastY=0, autoRotate=true;
+
+function initThreeIfNeeded(){
+  if(threeInited || typeof THREE==='undefined') return;
+  const container = document.getElementById('three3d');
+  const w=280, h=280;
+  threeScene = new THREE.Scene();
+  threeCamera = new THREE.PerspectiveCamera(32, w/h, 0.1, 100);
+  threeRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  threeRenderer.setSize(w,h);
+  threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  if(threeRenderer.outputEncoding !== undefined) threeRenderer.outputEncoding = THREE.sRGBEncoding;
+  container.appendChild(threeRenderer.domElement);
+
+  threeScene.add(new THREE.AmbientLight(0xffffff, 0.75));
+  const d1 = new THREE.DirectionalLight(0xffffff, 0.9); d1.position.set(3,5,6); threeScene.add(d1);
+  const d2 = new THREE.DirectionalLight(0xffffff, 0.35); d2.position.set(-4,-2,3); threeScene.add(d2);
+
+  threeGroup = new THREE.Group();
+  threeScene.add(threeGroup);
+
+  const dom = threeRenderer.domElement;
+  dom.style.cursor='grab';
+  dom.addEventListener('pointerdown', e=>{ isDragging=true; autoRotate=false; lastX=e.clientX; lastY=e.clientY; dom.style.cursor='grabbing'; });
+  window.addEventListener('pointerup', ()=>{ isDragging=false; dom.style.cursor='grab'; });
+  window.addEventListener('pointermove', e=>{
+    if(!isDragging) return;
+    rotY += (e.clientX-lastX)*0.012;
+    rotX += (e.clientY-lastY)*0.01;
+    rotX = Math.max(-0.7, Math.min(0.7, rotX));
+    lastX=e.clientX; lastY=e.clientY;
+  });
+
+  threeInited = true;
+  (function animate(){
+    requestAnimationFrame(animate);
+    if(autoRotate) rotY += 0.005;
+    if(threeGroup){ threeGroup.rotation.y = rotY; threeGroup.rotation.x = rotX; }
+    threeRenderer.render(threeScene, threeCamera);
+  })();
+}
+function clearThreeGroup(){
+  if(!threeGroup) return;
+  while(threeGroup.children.length){
+    const o = threeGroup.children.pop();
+    o.traverse(node=>{
+      if(node.geometry) node.geometry.dispose();
+      if(node.material) node.material.dispose();
+    });
+  }
+}
+function makeZoneTexture(){
+  const c = buildPrintCanvas(512);
+  const tex = new THREE.CanvasTexture(c);
+  tex.needsUpdate = true;
+  if(tex.encoding !== undefined) tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+function buildCamisa3D(texture){
+  const fabric = 0xEDE7DA;
+  const mat = new THREE.MeshStandardMaterial({color:fabric, roughness:0.92, side:THREE.DoubleSide});
+  const geo = new THREE.PlaneGeometry(3.4, 4.2, 30, 30);
+  bulge(geo, 3.4);
+  const body = new THREE.Mesh(geo, mat);
+  threeGroup.add(body);
+
+  const sleeveMat = new THREE.MeshStandardMaterial({color:fabric, roughness:0.92});
+  const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.5,1.5,14), sleeveMat);
+  sl.rotation.z = Math.PI/2.3; sl.position.set(-1.95,1.35,0.2);
+  const sr = new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.5,1.5,14), sleeveMat);
+  sr.rotation.z = -Math.PI/2.3; sr.position.set(1.95,1.35,0.2);
+  threeGroup.add(sl, sr);
+
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.5,0.08,8,24), new THREE.MeshStandardMaterial({color:fabric,roughness:0.92}));
+  collar.position.set(0,1.95,0.2); collar.rotation.x = Math.PI/2.2;
+  threeGroup.add(collar);
+
+  const printGeo = new THREE.PlaneGeometry(1.8, 2.2, 20,20);
+  bulge(printGeo, 3.4);
+  const printMat = new THREE.MeshStandardMaterial({map:texture, roughness:0.85, side:THREE.DoubleSide});
+  const printMesh = new THREE.Mesh(printGeo, printMat);
+  printMesh.position.set(0,-0.05,0.015);
+  threeGroup.add(printMesh);
+
+  threeCamera.position.set(0,0.1,7.2);
+  threeCamera.lookAt(0,0,0);
+}
+function bulge(geo, spanW){
+  const pos = geo.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i), y=pos.getY(i);
+    const z = Math.cos((x/spanW)*Math.PI*0.85)*0.32 * (1-Math.abs(y)/3.2*0.15);
+    pos.setZ(i, z);
+  }
+  geo.computeVertexNormals();
+}
+function buildCaneca3D(texture){
+  const bodyMat = new THREE.MeshStandardMaterial({map:texture, roughness:0.35, metalness:0.05});
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,2.6,48,1,true), bodyMat);
+  threeGroup.add(body);
+  const white = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.35});
+  const top = new THREE.Mesh(new THREE.RingGeometry(0.95,1.1,48), white);
+  top.rotation.x=Math.PI/2; top.position.y=1.3; threeGroup.add(top);
+  const bottom = new THREE.Mesh(new THREE.CircleGeometry(1.1,48), white);
+  bottom.rotation.x=-Math.PI/2; bottom.position.y=-1.3; threeGroup.add(bottom);
+  // alça: meio-anel (arco de 180°) com as duas pontas encostadas na parede da caneca
+  // e a curva projetada pra fora — sem rotação extra, que era o que achatava a alça contra o corpo
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.5,0.12,10,24,Math.PI), white);
+  handle.rotation.z = -Math.PI/2;
+  handle.position.set(1.1,0,0);
+  threeGroup.add(handle);
+  threeCamera.position.set(0.5,0.3,6.5);
+  threeCamera.lookAt(0,0,0);
+}
+function buildChineloSole(texture, t){
+  const group = new THREE.Group();
+  const sc = 3.0 / t.altura;
+  const H = t.altura*sc;
+  const pts = [
+    {x:0, y:H/2},
+    {x:(t.larguraSuperior/2)*sc, y:H/2 - H*0.20},
+    {x:(t.larguraCentral/2)*sc,  y:H/2 - H*0.55},
+    {x:(t.calcanhar/2)*sc,       y:H/2 - H*0.85},
+    {x:0, y:-H/2}
+  ];
+  function tangent(i){
+    const prev=pts[Math.max(0,i-1)], next=pts[Math.min(pts.length-1,i+1)];
+    return {x:(next.x-prev.x)/2, y:(next.y-prev.y)/2};
+  }
+  const shape = new THREE.Shape();
+  shape.moveTo(pts[0].x, pts[0].y);
+  const segs=[];
+  for(let i=0;i<pts.length-1;i++){
+    const t0=tangent(i), t1=tangent(i+1);
+    const c1={x:pts[i].x+t0.x/3,y:pts[i].y+t0.y/3}, c2={x:pts[i+1].x-t1.x/3,y:pts[i+1].y-t1.y/3};
+    segs.push({c1,c2,p:pts[i+1]});
+    shape.bezierCurveTo(c1.x,c1.y,c2.x,c2.y,pts[i+1].x,pts[i+1].y);
+  }
+  for(let i=segs.length-1;i>=0;i--){
+    const s=segs[i], prevPoint = i>0 ? segs[i-1].p : pts[0];
+    shape.bezierCurveTo(-s.c2.x,s.c2.y, -s.c1.x,s.c1.y, -prevPoint.x,prevPoint.y);
+  }
+  shape.closePath();
+
+  const sole = new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:0.16,bevelEnabled:true,bevelThickness:0.025,bevelSize:0.025,bevelSegments:2}),
+    new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.75}));
+  sole.rotation.x=-Math.PI/2;
+  group.add(sole);
+  const top = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshStandardMaterial({map:texture, roughness:0.55, side:THREE.DoubleSide}));
+  top.rotation.x=-Math.PI/2; top.position.y=0.17;
+  group.add(top);
+  const strapMat = new THREE.MeshStandardMaterial({color:0x1c1c1c, roughness:0.5});
+  const midHalfW = (t.larguraCentral/2)*sc;
+  const strapGeo = new THREE.BoxGeometry(0.1,0.09,H*0.5);
+  const sl = new THREE.Mesh(strapGeo, strapMat); sl.position.set(-midHalfW*0.9,0.21,H*0.1); sl.rotation.y=0.5;
+  const sr = new THREE.Mesh(strapGeo, strapMat); sr.position.set(midHalfW*0.9,0.21,H*0.1); sr.rotation.y=-0.5;
+  group.add(sl, sr);
+  return group;
+}
+function buildChinelo3D(texture){
+  const t = currentChineloParams();
+  const left = buildChineloSole(texture, t);
+  left.position.x = -1.4;
+  threeGroup.add(left);
+  const right = buildChineloSole(texture, t);
+  right.position.x = 1.4;
+  right.scale.x = -1;
+  threeGroup.add(right);
+  threeCamera.position.set(0,4.4,4.4);
+  threeCamera.lookAt(0,0,0);
+}
+function buildBone3D(texture){
+  const crownGeo = new THREE.SphereGeometry(1.4, 32, 20, -Math.PI*0.42, Math.PI*0.84, 0, Math.PI*0.62);
+  const crownMat = new THREE.MeshStandardMaterial({map:texture, roughness:0.85, side:THREE.DoubleSide});
+  const crown = new THREE.Mesh(crownGeo, crownMat);
+  crown.rotation.x = -Math.PI/2.6;
+  threeGroup.add(crown);
+  const brimMat = new THREE.MeshStandardMaterial({color:0xEDE7DA, roughness:0.8, side:THREE.DoubleSide});
+  const brimGeo = new THREE.CircleGeometry(1.15, 24, -Math.PI*0.28, Math.PI*0.56);
+  const brim = new THREE.Mesh(brimGeo, brimMat);
+  brim.rotation.x = -Math.PI/2 + 0.25;
+  brim.position.set(0,-0.55,1.05);
+  threeGroup.add(brim);
+  threeCamera.position.set(0,0.3,6.3);
+  threeCamera.lookAt(0,0,0);
+}
+function buildPrato3D(texture){
+  const plateMat = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.25, metalness:0.05, side:THREE.DoubleSide});
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7,1.75,0.06,48), plateMat);
+  threeGroup.add(base);
+  const printMat = new THREE.MeshStandardMaterial({map:texture, roughness:0.3, side:THREE.DoubleSide});
+  const print = new THREE.Mesh(new THREE.CircleGeometry(1.35,48), printMat);
+  print.rotation.x = -Math.PI/2; print.position.y = 0.035;
+  threeGroup.add(print);
+  threeCamera.position.set(0,3.6,3.0);
+  threeCamera.lookAt(0,0,0);
+}
+function buildCaneta3D(texture){
+  const bodyMat = new THREE.MeshStandardMaterial({map:texture, roughness:0.4, metalness:0.1});
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,3.0,24), bodyMat);
+  threeGroup.add(body);
+  const white = new THREE.MeshStandardMaterial({color:0xf2f2f2, roughness:0.35, metalness:0.15});
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.14,0.35,24), white);
+  tip.position.y = -1.67; threeGroup.add(tip);
+  const clip = new THREE.Mesh(new THREE.BoxGeometry(0.05,0.55,0.04), white);
+  clip.position.set(0.16,1.1,0); threeGroup.add(clip);
+  threeCamera.position.set(0,0,6.2);
+  threeCamera.lookAt(0,0,0);
+}
+function buildBag3D(texture){
+  const fabric = 0xEDE7DA;
+  const mat = new THREE.MeshStandardMaterial({map:texture, roughness:0.9, side:THREE.DoubleSide});
+  const geo = new THREE.PlaneGeometry(3.0, 3.2, 24, 24);
+  bulge(geo, 3.0);
+  const body = new THREE.Mesh(geo, mat);
+  threeGroup.add(body);
+  const handleMat = new THREE.MeshStandardMaterial({color:fabric, roughness:0.9});
+  const h1 = new THREE.Mesh(new THREE.TorusGeometry(0.42,0.05,8,20,Math.PI), handleMat);
+  h1.position.set(-0.7,1.6,0.15);
+  const h2 = h1.clone(); h2.position.x = 0.7;
+  threeGroup.add(h1,h2);
+  threeCamera.position.set(0,0,7.4);
+  threeCamera.lookAt(0,0,0);
+}
+function buildGenerico3D(texture, molde){
+  const ratio = molde.w/molde.h;
+  const h = 3.0, w = h*ratio;
+  const mat = new THREE.MeshStandardMaterial({map:texture, roughness:0.7, side:THREE.DoubleSide});
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(w,h), mat);
+  threeGroup.add(plane);
+  const border = new THREE.Mesh(new THREE.PlaneGeometry(w+0.15,h+0.15), new THREE.MeshStandardMaterial({color:0x2A2E38, roughness:0.9, side:THREE.DoubleSide}));
+  border.position.z = -0.02;
+  threeGroup.add(border);
+  threeCamera.position.set(0,0,7);
+  threeCamera.lookAt(0,0,0);
+}
+function updateThreeMockup(){
+  if(!threeInited || !img) return;
+  const produto = produtoSel.value;
+  const texture = makeZoneTexture();
+  clearThreeGroup();
+  if(produto==="Camisa") buildCamisa3D(texture);
+  else if(produto==="Caneca" || produto==="Copo") buildCaneca3D(texture);
+  else if(produto==="Chinelo (nº BR)") buildChinelo3D(texture);
+  else if(produto==="Boné") buildBone3D(texture);
+  else if(produto==="Prato") buildPrato3D(texture);
+  else if(produto==="Caneta") buildCaneta3D(texture);
+  else if(produto==="Bag") buildBag3D(texture);
+  else buildGenerico3D(texture, currentMolde());
+}
+
+/* ---------- editor de tabela ---------- */
+function renderTableEditor(){
+  const produto = produtoSel.value;
+  const p=MOLDES[produto];
+  const editor=document.getElementById('tableEditor');
+  let html;
+  if(produto==="Chinelo (nº BR)"){
+    html = `<table><tr><th>Tamanho</th><th>Altura</th><th>Larg. sup.</th><th>Larg. central</th><th>Calcanhar</th><th></th></tr>`;
+    Object.entries(p.tamanhos).forEach(([nome,dim])=>{
+      html += `<tr data-nome="${nome}">
+        <td><input type="text" class="e-nome" value="${nome}"></td>
+        <td><input type="number" step="0.1" class="e-altura" value="${dim.altura}"></td>
+        <td><input type="number" step="0.1" class="e-lsup" value="${dim.larguraSuperior}"></td>
+        <td><input type="number" step="0.1" class="e-lcen" value="${dim.larguraCentral}"></td>
+        <td><input type="number" step="0.1" class="e-calc" value="${dim.calcanhar}"></td>
+        <td><button class="btn btn-secondary e-del" style="padding:4px 8px;margin:0;">×</button></td>
+      </tr>`;
+    });
+  } else {
+    html = `<table><tr><th>Tamanho</th><th>Larg (cm)</th><th>Alt (cm)</th><th></th></tr>`;
+    Object.entries(p.tamanhos).forEach(([nome,dim])=>{
+      html += `<tr data-nome="${nome}">
+        <td><input type="text" class="e-nome" value="${nome}"></td>
+        <td><input type="number" step="0.1" class="e-w" value="${dim.w}"></td>
+        <td><input type="number" step="0.1" class="e-h" value="${dim.h}"></td>
+        <td><button class="btn btn-secondary e-del" style="padding:4px 8px;margin:0;">×</button></td>
+      </tr>`;
+    });
+  }
+  html += `</table>`;
+  editor.innerHTML = html;
+  editor.querySelectorAll('.e-del').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const tr=e.target.closest('tr'); delete p.tamanhos[tr.dataset.nome]; renderTableEditor();
+    });
+  });
+}
+produtoSel.addEventListener('change', renderTableEditor);
+document.getElementById('addSize').addEventListener('click', ()=>{
+  const produto = produtoSel.value;
+  const p=MOLDES[produto];
+  let n="novo", i=1;
+  while(p.tamanhos[n]){ n="novo"+i; i++; }
+  p.tamanhos[n] = (produto==="Chinelo (nº BR)") ? {altura:24,larguraSuperior:9.5,larguraCentral:6.5,calcanhar:7.5} : {w:20,h:20};
+  renderTableEditor();
+});
+document.getElementById('saveTable').addEventListener('click', async ()=>{
+  const produto = produtoSel.value;
+  const p=MOLDES[produto];
+  const rows=document.querySelectorAll('#tableEditor tr[data-nome]');
+  const novo={};
+  if(produto==="Chinelo (nº BR)"){
+    rows.forEach(tr=>{
+      const nome=tr.querySelector('.e-nome').value.trim()||"sem-nome";
+      const altura=parseFloat(tr.querySelector('.e-altura').value)||1;
+      const larguraSuperior=parseFloat(tr.querySelector('.e-lsup').value)||1;
+      const larguraCentral=parseFloat(tr.querySelector('.e-lcen').value)||1;
+      const calcanhar=parseFloat(tr.querySelector('.e-calc').value)||1;
+      novo[nome]={altura,larguraSuperior,larguraCentral,calcanhar};
+    });
+  } else {
+    rows.forEach(tr=>{
+      const nome=tr.querySelector('.e-nome').value.trim()||"sem-nome";
+      const w=parseFloat(tr.querySelector('.e-w').value)||1;
+      const h=parseFloat(tr.querySelector('.e-h').value)||1;
+      novo[nome]={w,h};
+    });
+  }
+  p.tamanhos=novo;
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(MOLDES), false); statusEl.textContent="tabela salva neste navegador"; }
+  catch(err){ statusEl.textContent="não foi possível salvar (tabela ainda ativa nesta sessão)"; }
+  populateTamanhos(); renderTableEditor();
+});
+
+document.getElementById('exportTable').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(MOLDES, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'moldes-bancada-de-estampas.json';
+  a.click(); URL.revokeObjectURL(url);
+  statusEl.textContent = 'tabela exportada em JSON';
+});
+document.getElementById('importTableBtn').addEventListener('click', ()=>{
+  document.getElementById('importTableFile').click();
+});
+document.getElementById('importTableFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(typeof data !== 'object' || !data) throw new Error('formato inválido');
+      let count = 0;
+      Object.keys(data).forEach(k=>{
+        if(data[k] && data[k].tamanhos){ MOLDES[k] = data[k]; count++; }
+      });
+      if(count===0) throw new Error('nenhum produto reconhecido no arquivo');
+      populateProdutos();
+      renderTableEditor();
+      window.storage.set(STORAGE_KEY, JSON.stringify(MOLDES), false).catch(()=>{});
+      statusEl.textContent = `${count} produto(s) importado(s) com sucesso`;
+    }catch(err){
+      statusEl.textContent = 'não consegui ler esse arquivo (formato inválido)';
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+async function init(){
+  try{
+    const saved = await window.storage.get(STORAGE_KEY, false);
+    if(saved && saved.value) MOLDES = JSON.parse(saved.value);
+  }catch(err){}
+  populateProdutos();
+  renderTableEditor();
+  await restoreSession();
+}
+init();
+</script>
+</body>
+</html>
+
